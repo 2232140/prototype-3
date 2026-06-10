@@ -37,9 +37,11 @@ export default function Home({ onNavigate, providerToken = null }) {
   const [calendarInfo, setCalendarInfo] = useState(null);
 
   useEffect(() => {
-    setEntries(getEntries());
-    setTodayEntry(getTodayEntry());
-    setSettings(getSettingsWithDefaults());
+    (async () => {
+      setEntries(await getEntries());
+      setTodayEntry(await getTodayEntry());
+      setSettings(getSettingsWithDefaults());
+    })();
   }, []);
 
   useEffect(() => {

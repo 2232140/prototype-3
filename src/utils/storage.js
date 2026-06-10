@@ -1,33 +1,47 @@
-export const getEntries = () => {
-  try {
-    return JSON.parse(localStorage.getItem('kokoro_entries') || '[]');
-  } catch {
-    return [];
-  }
+import { supabase } from './supabase';
+
+const localDate = () => new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+
+export const getEntries = async () => {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from('entries')
+    .select('*')
+    .order('date', { ascending: true });
+  if (error) { console.error(error); return []; }
+  return data || [];
 };
 
-export const saveEntry = (entry) => {
-  const entries = getEntries();
-  const todayStr = new Date().toDateString();
-  const idx = entries.findIndex(e => new Date(e.date).toDateString() === todayStr);
-  const newEntry = { ...entry, date: new Date().toISOString(), id: Date.now() };
-  if (idx >= 0) entries[idx] = newEntry;
-  else entries.push(newEntry);
-  localStorage.setItem('kokoro_entries', JSON.stringify(entries));
-  return newEntry;
+export const saveEntry = async ({ mood, energy, memo }) => {
+  if (!supabase) return null;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await supabase
+    .from('entries')
+    .upsert(
+      { user_id: user.id, date: localDate(), mood, energy, memo: memo || null },
+      { onConflict: 'user_id,date' }
+    )
+    .select()
+    .single();
+  if (error) { console.error(error); return null; }
+  return data;
 };
 
-export const getTodayEntry = () => {
-  const todayStr = new Date().toDateString();
-  return getEntries().find(e => new Date(e.date).toDateString() === todayStr) || null;
+export const getTodayEntry = async () => {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('entries')
+    .select('*')
+    .eq('date', localDate())
+    .maybeSingle();
+  if (error) { console.error(error); return null; }
+  return data;
 };
 
 export const getSettings = () => {
-  try {
-    return JSON.parse(localStorage.getItem('kokoro_settings') || '{}');
-  } catch {
-    return {};
-  }
+  try { return JSON.parse(localStorage.getItem('kokoro_settings') || '{}'); }
+  catch { return {}; }
 };
 
 export const saveSettings = (settings) => {
@@ -46,11 +60,8 @@ export const getSettingsWithDefaults = () => ({
 });
 
 export const getLetters = () => {
-  try {
-    return JSON.parse(localStorage.getItem('kokoro_letters') || '[]');
-  } catch {
-    return [];
-  }
+  try { return JSON.parse(localStorage.getItem('kokoro_letters') || '[]'); }
+  catch { return []; }
 };
 
 export const saveLetter = (text) => {

@@ -18,20 +18,22 @@ export default function CheckIn({ onNavigate }) {
   const [ripple, setRipple] = useState(false);
 
   useEffect(() => {
-    const today = getTodayEntry();
-    if (today) {
-      setMood(today.mood);
-      setEnergy(today.energy);
-      setMemo(today.memo || '');
-    }
-    setMsg(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
+    (async () => {
+      const today = await getTodayEntry();
+      if (today) {
+        setMood(today.mood);
+        setEnergy(today.energy);
+        setMemo(today.memo || '');
+      }
+      setMsg(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
+    })();
   }, []);
 
   const submit = () => {
     if (!mood || !energy) return;
     setRipple(true);
-    setTimeout(() => {
-      saveEntry({ mood, energy, memo });
+    setTimeout(async () => {
+      await saveEntry({ mood, energy, memo });
       setStep(4);
     }, 650);
     setTimeout(() => setRipple(false), 1500);

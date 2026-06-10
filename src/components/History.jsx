@@ -52,7 +52,7 @@ export default function History() {
   const [entries, setEntries] = useState([]);
   const [metric, setMetric]   = useState('mood');
 
-  useEffect(() => { setEntries(getEntries()); }, []);
+  useEffect(() => { getEntries().then(setEntries); }, []);
 
   const days    = getLast7Days(entries);
   const improve = calculateImprovement(entries);

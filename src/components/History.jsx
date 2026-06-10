@@ -3,6 +3,98 @@ import { getEntries } from '../utils/storage';
 import { getLast7Days, MOOD_OPTIONS, ENERGY_OPTIONS, calculateImprovement } from '../utils/analysis';
 import PageHeader from './PageHeader';
 
+function CalendarView({ entries }) {
+  const [month, setMonth] = useState(() => {
+    const d = new Date(); d.setDate(1); return d;
+  });
+  const [selected, setSelected] = useState(null);
+
+  const year = month.getFullYear();
+  const mon  = month.getMonth();
+
+  const entryMap = {};
+  entries.forEach(e => {
+    const d = new Date(e.date + 'T00:00:00');
+    entryMap[`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`] = e;
+  });
+
+  const startDow = new Date(year, mon, 1).getDay();
+  const daysInMonth = new Date(year, mon + 1, 0).getDate();
+  const cells = [
+    ...Array(startDow).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => new Date(year, mon, i + 1)),
+  ];
+
+  const moodColor = (mood) =>
+    ['', '#E07B7B', '#F5A623', '#F5D76E', '#7ECBA1', '#64B6AC'][mood] || null;
+
+  const today = new Date();
+
+  const changeMonth = (dir) => {
+    setSelected(null);
+    setMonth(m => new Date(m.getFullYear(), m.getMonth() + dir, 1));
+  };
+
+  return (
+    <div className="calendar-view">
+      <div className="cal-nav">
+        <button className="cal-nav-btn" onClick={() => changeMonth(-1)}>‹</button>
+        <span className="cal-nav-title">{year}年{mon + 1}月</span>
+        <button className="cal-nav-btn" onClick={() => changeMonth(1)}>›</button>
+      </div>
+
+      <div className="cal-grid">
+        {['日','月','火','水','木','金','土'].map(d => (
+          <div key={d} className="cal-dow">{d}</div>
+        ))}
+        {cells.map((date, i) => {
+          if (!date) return <div key={`e${i}`} className="cal-cell cal-empty" />;
+          const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+          const entry   = entryMap[key];
+          const isToday = date.toDateString() === today.toDateString();
+          const isSel   = selected && date.toDateString() === selected.date.toDateString();
+          const color   = entry ? moodColor(entry.mood) : null;
+          return (
+            <div
+              key={key}
+              className={`cal-cell${isToday ? ' cal-today' : ''}${isSel ? ' cal-selected' : ''}${entry ? ' cal-has' : ''}`}
+              style={color ? { background: color + '40', borderColor: color } : {}}
+              onClick={() => entry && setSelected(isSel ? null : { date, entry })}
+            >
+              <span className="cal-day-num">{date.getDate()}</span>
+              {entry && <span className="cal-mood-emoji">{MOOD_OPTIONS[entry.mood - 1]?.emoji}</span>}
+            </div>
+          );
+        })}
+      </div>
+
+      {selected && (
+        <div className="cal-detail">
+          <div className="cal-detail-date">
+            {selected.date.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' })}
+          </div>
+          <div className="cal-detail-scores">
+            <span>気分　{MOOD_OPTIONS[selected.entry.mood - 1]?.emoji} {MOOD_OPTIONS[selected.entry.mood - 1]?.label}</span>
+            <span>体調　{ENERGY_OPTIONS[selected.entry.energy - 1]?.emoji} {ENERGY_OPTIONS[selected.entry.energy - 1]?.label}</span>
+          </div>
+          {selected.entry.memo && (
+            <p className="cal-detail-memo">「{selected.entry.memo}」</p>
+          )}
+        </div>
+      )}
+
+      <div className="cal-legend">
+        {MOOD_OPTIONS.map(o => (
+          <span key={o.value} className="cal-legend-item">
+            <span className="cal-legend-dot" style={{ background: o.color + '60', borderColor: o.color }} />
+            {o.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function BarChart({ days, metric }) {
   const baseColor = metric === 'mood' ? '#7C6FCD' : '#64B6AC';
   const todayColor = metric === 'mood' ? '#A89FDE' : '#95E1D3';
@@ -51,6 +143,7 @@ function BarChart({ days, metric }) {
 export default function History() {
   const [entries, setEntries] = useState([]);
   const [metric, setMetric]   = useState('mood');
+  const [view, setView]       = useState('chart');
 
   useEffect(() => { getEntries().then(setEntries); }, []);
 
@@ -59,26 +152,41 @@ export default function History() {
 
   return (
     <div className="screen history-screen">
-      <PageHeader title="履歴" subtitle="直近7日間の記録" emoji="📊" />
+      <PageHeader title="履歴" subtitle="記録の振り返り" emoji="📊" />
 
       <div className="card" style={{ marginTop: 20 }}>
         <div className="tab-row">
-          {['mood', 'energy'].map((m) => (
-            <button
-              key={m}
-              className={`tab-btn ${metric === m ? 'active' : ''}`}
-              onClick={() => setMetric(m)}
-            >
-              {m === 'mood' ? '😊 気分' : '⚡ 体調'}
-            </button>
-          ))}
+          <button className={`tab-btn ${view === 'chart' ? 'active' : ''}`} onClick={() => setView('chart')}>
+            📈 グラフ
+          </button>
+          <button className={`tab-btn ${view === 'calendar' ? 'active' : ''}`} onClick={() => setView('calendar')}>
+            📅 カレンダー
+          </button>
         </div>
-        <BarChart days={days} metric={metric} />
-        {improve !== null && (
-          <p className="chart-note" style={{ color: improve >= 0 ? '#64B6AC' : '#E07B7B' }}>
-            {improve >= 0 ? '📈' : '📉'} 前週比 {improve >= 0 ? '+' : ''}{improve}% 改善しました！
-          </p>
+
+        {view === 'chart' && (
+          <>
+            <div className="tab-row" style={{ marginTop: 8 }}>
+              {['mood', 'energy'].map((m) => (
+                <button
+                  key={m}
+                  className={`tab-btn ${metric === m ? 'active' : ''}`}
+                  onClick={() => setMetric(m)}
+                >
+                  {m === 'mood' ? '😊 気分' : '⚡ 体調'}
+                </button>
+              ))}
+            </div>
+            <BarChart days={days} metric={metric} />
+            {improve !== null && (
+              <p className="chart-note" style={{ color: improve >= 0 ? '#64B6AC' : '#E07B7B' }}>
+                {improve >= 0 ? '📈' : '📉'} 前週比 {improve >= 0 ? '+' : ''}{improve}% 改善しました！
+              </p>
+            )}
+          </>
         )}
+
+        {view === 'calendar' && <CalendarView entries={entries} />}
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>

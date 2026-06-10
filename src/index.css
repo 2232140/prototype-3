@@ -1234,3 +1234,65 @@ button {
   border: 1.5px solid;
   display: inline-block;
 }
+
+/* ===== LINE CHART ===== */
+.line-chart-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 8px -4px 4px;
+  padding-bottom: 4px;
+}
+.line-chart-scroll::-webkit-scrollbar { height: 4px; }
+.line-chart-scroll::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 2px; }
+
+/* ===== RECORDS LIST ===== */
+.records-view { padding-top: 4px; }
+
+.record-list { display: flex; flex-direction: column; gap: 10px; }
+
+.record-item {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+}
+.letter-item { border-color: #C3A8CE; background: #FAF7FF; }
+
+.record-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.record-date { font-size: 12px; font-weight: 700; color: var(--sub); }
+.record-emojis { font-size: 18px; }
+.record-memo {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0;
+}
+.letter-text { color: #7C5B9B; font-style: italic; }
+
+.letter-actions { display: flex; gap: 6px; }
+.letter-action-btn {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1.5px solid;
+  background: none;
+  cursor: pointer;
+}
+.letter-action-btn.edit   { color: var(--primary); border-color: var(--primary); }
+.letter-action-btn.delete { color: #E07B7B; border-color: #E07B7B; }
+
+.letter-edit-area { margin-top: 6px; }
+.letter-edit-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+.empty-hint {
+  text-align: center;
+  color: var(--sub);
+  font-size: 13px;
+  padding: 20px 0;
+}

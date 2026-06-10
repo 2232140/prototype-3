@@ -74,3 +74,13 @@ export const wroteLetterToday = () => {
   const today = new Date().toDateString();
   return getLetters().some(l => new Date(l.date).toDateString() === today);
 };
+
+export const updateLetter = (id, text) => {
+  const letters = getLetters().map(l => l.id === id ? { ...l, text: text.trim() } : l);
+  localStorage.setItem('kokoro_letters', JSON.stringify(letters));
+};
+
+export const deleteLetter = (id) => {
+  const letters = getLetters().filter(l => l.id !== id);
+  localStorage.setItem('kokoro_letters', JSON.stringify(letters));
+};

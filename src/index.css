@@ -1296,3 +1296,20 @@ button {
   font-size: 13px;
   padding: 20px 0;
 }
+
+/* ===== TODAY NOTE INPUT ===== */
+.today-note-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  margin: 10px 0 6px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.today-note-input:focus { border-color: var(--primary); }
+.today-note-input::placeholder { color: #B0B8C4; }

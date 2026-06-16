@@ -5,7 +5,6 @@ import {
   getWeeklySummary, MOOD_OPTIONS, ENERGY_OPTIONS,
 } from '../utils/analysis';
 import { getAIAdvice } from '../utils/aiAdvice';
-import { getTodayEvents } from '../utils/calendar';
 
 function Collapsible({ title, children }) {
   const [open, setOpen] = useState(false);
@@ -31,10 +30,10 @@ export default function Home({ onNavigate, providerToken = null }) {
   const [aiAdvice, setAiAdvice]       = useState('');
   const [aiLoading, setAiLoading]     = useState(false);
   const [aiError, setAiError]         = useState('');
+  const [todayNote, setTodayNote]     = useState('');
   const [letterText, setLetterText]   = useState('');
   const [letterSent, setLetterSent]   = useState(false);
   const [letterDismissed, setLetterDismissed] = useState(false);
-  const [calendarInfo, setCalendarInfo] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -43,11 +42,6 @@ export default function Home({ onNavigate, providerToken = null }) {
       setSettings(getSettingsWithDefaults());
     })();
   }, []);
-
-  useEffect(() => {
-    if (!providerToken) return;
-    getTodayEvents(providerToken).then(info => setCalendarInfo(info));
-  }, [providerToken]);
 
   useEffect(() => {
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
@@ -100,7 +94,7 @@ export default function Home({ onNavigate, providerToken = null }) {
     setAiError('');
     setAiAdvice('');
     try {
-      const advice = await getAIAdvice(entries, state, calendarInfo);
+      const advice = await getAIAdvice(entries, state, todayNote.trim() || null);
       setAiAdvice(advice);
     } catch (e) {
       setAiError(e.message);
@@ -155,8 +149,17 @@ export default function Home({ onNavigate, providerToken = null }) {
         <p className="state-advice">💡 {state.advice}</p>
         <div className="ai-advice-section">
           <div className="divider" />
+          <span className="ai-advice-label">✨ AIパーソナルアドバイス</span>
+          <input
+            className="today-note-input"
+            type="text"
+            value={todayNote}
+            onChange={e => setTodayNote(e.target.value)}
+            placeholder="今日の状況をひとこと…（例：試験がある、休日）"
+            maxLength={60}
+          />
           <div className="ai-advice-header">
-            <span className="ai-advice-label">✨ AIパーソナルアドバイス</span>
+            <span />
             <button
               className={`chip-btn primary${aiLoading ? ' loading' : ''}`}
               onClick={handleAIAdvice}

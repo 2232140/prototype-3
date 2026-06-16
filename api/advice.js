@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'AIアドバイス機能は現在利用できません。' });
   }
 
-  const { stateTitle, recentSummary, moodScore, calendarInfo } = req.body;
+  const { stateTitle, recentSummary, moodScore, todayNote } = req.body;
   if (!stateTitle) {
     return res.status(400).json({ error: '状態データが不足しています。' });
   }
@@ -22,9 +22,7 @@ export default async function handler(req, res) {
         ? 'あなたは心身の健康を支える温かみのあるアシスタントです。ユーザーは少し落ち込んでいます。「お水を一杯飲んでみて」「窓を少し開けてみよう」のような、負担が全くない極小さなアクションを1つだけ、50文字以内で提案してください。'
         : 'あなたは心身の健康を支える温かみのあるアシスタントです。ユーザーの最近の状態を踏まえ、今日すぐ実践できる具体的なアドバイスを1つだけ、50文字以内の日本語で返してください。説明や前置きは不要です。';
 
-  const scheduleContext = calendarInfo
-    ? `\n今日の予定：${calendarInfo.count}件（${calendarInfo.summary}）`
-    : '';
+  const scheduleContext = todayNote ? `\n今日の状況：${todayNote}` : '';
 
   const prompt =
     `${systemInstruction}\n\n` +

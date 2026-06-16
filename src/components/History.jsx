@@ -153,7 +153,7 @@ function CalendarView({ entries }) {
               style={color ? { background: color + '40', borderColor: color } : {}}
               onClick={() => entry && setSelected(isSel ? null : { date, entry })}>
               <span className="cal-day-num">{date.getDate()}</span>
-              {entry && <span className="cal-mood-emoji">{MOOD_OPTIONS[entry.mood - 1]?.emoji}</span>}
+              {entry && <span className="cal-mood-emoji">{MOOD_OPTIONS[Math.round(entry.mood) - 1]?.emoji}</span>}
             </div>
           );
         })}
@@ -164,8 +164,8 @@ function CalendarView({ entries }) {
             {selected.date.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' })}
           </div>
           <div className="cal-detail-scores">
-            <span>気分　{MOOD_OPTIONS[selected.entry.mood - 1]?.emoji} {MOOD_OPTIONS[selected.entry.mood - 1]?.label}</span>
-            <span>体調　{ENERGY_OPTIONS[selected.entry.energy - 1]?.emoji} {ENERGY_OPTIONS[selected.entry.energy - 1]?.label}</span>
+            <span>気分　{MOOD_OPTIONS[Math.round(selected.entry.mood) - 1]?.emoji} {MOOD_OPTIONS[Math.round(selected.entry.mood) - 1]?.label}</span>
+            <span>体調　{ENERGY_OPTIONS[Math.round(selected.entry.energy) - 1]?.emoji} {ENERGY_OPTIONS[Math.round(selected.entry.energy) - 1]?.label}</span>
           </div>
           {selected.entry.memo && <p className="cal-detail-memo">「{selected.entry.memo}」</p>}
         </div>
@@ -233,7 +233,7 @@ function RecordsList({ entries }) {
                       {d.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
                     </span>
                     <span className="record-emojis">
-                      {MOOD_OPTIONS[e.mood - 1]?.emoji}{ENERGY_OPTIONS[e.energy - 1]?.emoji}
+                      {MOOD_OPTIONS[Math.round(e.mood) - 1]?.emoji}{ENERGY_OPTIONS[Math.round(e.energy) - 1]?.emoji}
                     </span>
                   </div>
                   <p className="record-memo">「{e.memo}」</p>
@@ -359,8 +359,8 @@ export default function History() {
                   </div>
                   <div className="day-content">
                     <span className="day-score-emoji">
-                      {MOOD_OPTIONS[day.entry.mood - 1]?.emoji}
-                      {ENERGY_OPTIONS[day.entry.energy - 1]?.emoji}
+                      {MOOD_OPTIONS[Math.round(day.entry.mood) - 1]?.emoji}
+                      {ENERGY_OPTIONS[Math.round(day.entry.energy) - 1]?.emoji}
                     </span>
                     {day.entry.memo && <p className="day-memo">"{day.entry.memo}"</p>}
                   </div>

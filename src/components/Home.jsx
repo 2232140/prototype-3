@@ -133,8 +133,8 @@ export default function Home({ onNavigate, providerToken = null }) {
           <div>
             <div className="done-main">今日の記録は完了しています！</div>
             <div className="done-emojis">
-              気分 {MOOD_OPTIONS[todayEntry.mood - 1]?.emoji}
-              {'　'}体調 {ENERGY_OPTIONS[todayEntry.energy - 1]?.emoji}
+              気分 {MOOD_OPTIONS[Math.round(todayEntry.mood) - 1]?.emoji}
+              {'　'}体調 {ENERGY_OPTIONS[Math.round(todayEntry.energy) - 1]?.emoji}
             </div>
           </div>
           <button className="edit-link" onClick={() => onNavigate('checkin')}>修正</button>

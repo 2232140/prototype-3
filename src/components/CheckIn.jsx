@@ -9,11 +9,39 @@ const MESSAGES = [
   '自分の状態に気づくこと、\nそれだけで十分すごいことだよ。🌸',
 ];
 
+function SliderQuestion({ label, value, onChange, options, color }) {
+  const idx     = Math.min(options.length - 1, Math.max(0, Math.round(value) - 1));
+  const current = options[idx];
+  const fill    = `${((value - 1) / 4) * 100}%`;
+
+  return (
+    <div className="slider-block">
+      <h2 className="step-q">{label}</h2>
+      <div className="slider-emoji-display">
+        <span className="slider-emoji-big">{current.emoji}</span>
+        <span className="slider-label-text" style={{ color }}>{current.label}</span>
+      </div>
+      <input
+        type="range"
+        min="1" max="5" step="0.1"
+        value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        className="mood-range"
+        style={{ '--fill': fill, '--color': color }}
+      />
+      <div className="slider-endpoints">
+        <span>{options[0].emoji} {options[0].label}</span>
+        <span>{options[4].label} {options[4].emoji}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function CheckIn({ onNavigate }) {
-  const [step, setStep]     = useState(1);
-  const [mood, setMood]     = useState(null);
-  const [energy, setEnergy] = useState(null);
+  const [mood, setMood]     = useState(3);
+  const [energy, setEnergy] = useState(3);
   const [memo, setMemo]     = useState('');
+  const [done, setDone]     = useState(false);
   const [msg, setMsg]       = useState('');
   const [ripple, setRipple] = useState(false);
 
@@ -21,8 +49,8 @@ export default function CheckIn({ onNavigate }) {
     (async () => {
       const today = await getTodayEntry();
       if (today) {
-        setMood(today.mood);
-        setEnergy(today.energy);
+        setMood(Number(today.mood));
+        setEnergy(Number(today.energy));
         setMemo(today.memo || '');
       }
       setMsg(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
@@ -30,28 +58,16 @@ export default function CheckIn({ onNavigate }) {
   }, []);
 
   const submit = () => {
-    if (!mood || !energy) return;
     setRipple(true);
     setTimeout(async () => {
       await saveEntry({ mood, energy, memo });
-      setStep(4);
+      setDone(true);
     }, 650);
     setTimeout(() => setRipple(false), 1500);
   };
 
-  const pickMood = (v) => {
-    setMood(v);
-    setTimeout(() => setStep(2), 250);
-  };
-
-  const pickEnergy = (v) => {
-    setEnergy(v);
-    setTimeout(() => setStep(3), 250);
-  };
-
   return (
-    <div className={`screen ${step === 4 ? '' : 'checkin-screen'}`}>
-
+    <div className={`screen ${done ? '' : 'checkin-screen'}`}>
       {ripple && (
         <div className="ripple-overlay">
           <div className="ripple-circle r1" />
@@ -60,7 +76,7 @@ export default function CheckIn({ onNavigate }) {
         </div>
       )}
 
-      {step === 4 ? (
+      {done ? (
         <div className="checkin-done">
           <div className="done-emoji-big">🎉</div>
           <h2 className="done-title-big">記録完了！</h2>
@@ -73,71 +89,41 @@ export default function CheckIn({ onNavigate }) {
         <>
           <div className="checkin-header">
             <h1 className="checkin-title">今日の記録</h1>
-            <div className="step-dots">
-              {[1, 2, 3].map((s) => (
-                <div key={s} className={`step-dot ${step >= s ? 'on' : ''}`} />
-              ))}
-            </div>
           </div>
 
-          {step === 1 && (
-            <div className="step-body" key="step1">
-              <h2 className="step-q">今日の気分は？</h2>
-              <p className="step-hint">一番近いものを選んでください</p>
-              <div className="options-row">
-                {MOOD_OPTIONS.map((o) => (
-                  <button
-                    key={o.value}
-                    className={`opt-btn ${mood === o.value ? 'selected' : ''}`}
-                    style={mood === o.value ? { borderColor: o.color, background: o.color + '22' } : {}}
-                    onClick={() => pickMood(o.value)}
-                  >
-                    <span className="opt-emoji">{o.emoji}</span>
-                    <span className="opt-label">{o.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="step-body" key="step2">
-              <h2 className="step-q">体の調子は？</h2>
-              <p className="step-hint">エネルギーレベルを教えてください</p>
-              <div className="options-row">
-                {ENERGY_OPTIONS.map((o) => (
-                  <button
-                    key={o.value}
-                    className={`opt-btn ${energy === o.value ? 'selected' : ''}`}
-                    style={energy === o.value ? { borderColor: o.color, background: o.color + '22' } : {}}
-                    onClick={() => pickEnergy(o.value)}
-                  >
-                    <span className="opt-emoji">{o.emoji}</span>
-                    <span className="opt-label">{o.label}</span>
-                  </button>
-                ))}
-              </div>
-              <button className="back-btn" onClick={() => setStep(1)}>← 戻る</button>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="step-body" key="step3">
-              <h2 className="step-q">一言メモ（任意）</h2>
-              <p className="step-hint">今日感じたことを自由に書いてみましょう</p>
+          <div className="checkin-sliders">
+            <SliderQuestion
+              label="今日の気分は？"
+              value={mood}
+              onChange={setMood}
+              options={MOOD_OPTIONS}
+              color="#7C6FCD"
+            />
+            <div className="slider-divider" />
+            <SliderQuestion
+              label="体の調子は？"
+              value={energy}
+              onChange={setEnergy}
+              options={ENERGY_OPTIONS}
+              color="#64B6AC"
+            />
+            <div className="slider-divider" />
+            <div className="slider-memo-block">
+              <h2 className="step-q">
+                一言メモ <span className="step-hint-inline">（任意）</span>
+              </h2>
               <textarea
                 className="memo-area"
                 value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder="今日あったこと、感じたこと… 書かなくてもOK！"
-                rows={5}
+                onChange={e => setMemo(e.target.value)}
+                placeholder="今日感じたことを自由に書いてみましょう"
+                rows={3}
               />
-              <div className="step-actions">
-                <button className="back-btn" onClick={() => setStep(2)}>← 戻る</button>
-                <button className="primary-btn" onClick={submit}>記録する ✓</button>
-              </div>
             </div>
-          )}
+            <button className="primary-btn full" onClick={submit} style={{ marginTop: 8 }}>
+              記録する ✓
+            </button>
+          </div>
         </>
       )}
     </div>

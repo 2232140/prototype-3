@@ -4,7 +4,7 @@ export const getAIAdvice = async (entries, state, todayNote = null) => {
   const recent = entries.slice(-7);
   const recentSummary = recent.length > 0
     ? recent.map(e =>
-        `${new Date(e.date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}: 気分=${MOOD_LABELS[e.mood]}, 体調=${MOOD_LABELS[e.energy]}`
+        `${new Date(e.date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}: 気分=${MOOD_LABELS[Math.round(e.mood)]}, 体調=${MOOD_LABELS[Math.round(e.energy)]}`
       ).join(' / ')
     : 'まだ記録がありません';
 

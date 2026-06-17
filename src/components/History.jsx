@@ -327,7 +327,7 @@ export default function History() {
             }
             {period === 'week' && improve !== null && (
               <p className="chart-note" style={{ color: improve >= 0 ? '#64B6AC' : '#E07B7B' }}>
-                {improve >= 0 ? '📈' : '📉'} 前週比 {improve >= 0 ? '+' : ''}{improve}% 改善しました！
+                {improve >= 0 ? `📈 前週比 +${improve}% 好調です！` : `📉 前週比 ${improve}%（先週より少し低め）`}
               </p>
             )}
             {period === 'all' && entries.length > 0 && (

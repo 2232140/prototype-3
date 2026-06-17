@@ -205,7 +205,7 @@ export default function Home({ onNavigate, providerToken = null }) {
               <div className="stat-num" style={{ color: improve >= 0 ? '#64B6AC' : '#E07B7B' }}>
                 {improve >= 0 ? '+' : ''}{improve}<span className="stat-unit">%</span>
               </div>
-              <div className="stat-label">前週比で改善</div>
+              <div className="stat-label">{improve >= 0 ? '前週より好調' : '前週との比較'}</div>
             </>
           ) : (
             <>

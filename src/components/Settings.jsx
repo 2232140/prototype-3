@@ -92,7 +92,7 @@ export default function Settings({ user }) {
           {perm === 'granted' ? (
             <div className="notif-ok">
               <span>✅</span>
-              <span>通知が有効です（毎日 {s.notificationTime} に通知します）</span>
+              <span>通知が有効です（アプリを開いているとき {s.notificationTime} に通知します）</span>
             </div>
           ) : perm === 'denied' ? (
             <div className="notif-denied">
@@ -110,8 +110,8 @@ export default function Settings({ user }) {
       <div className="card privacy-card">
         <h2 className="card-section-title">🔒 プライバシー</h2>
         <p className="privacy-text">
-          記録データはこのデバイスのみに保存されます。<br />
-          AIアドバイス機能を使用する場合のみ、状態データがサーバーに送信されます。
+          記録データはSupabaseデータベースに安全に保存されます。<br />
+          AI相談機能を使用する場合のみ、状態データがサーバーに送信されます。
         </p>
       </div>
 

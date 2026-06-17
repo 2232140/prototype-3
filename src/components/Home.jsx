@@ -46,12 +46,24 @@ export default function Home({ onNavigate, providerToken = null }) {
   useEffect(() => {
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
     const s = getSettingsWithDefaults();
-    if (!s.notificationEnabled || getTodayEntry()) return;
+    if (!s.notificationEnabled) return;
+
     const [h, m] = s.notificationTime.split(':').map(Number);
-    const now = new Date();
-    if (now.getHours() >= h && now.getMinutes() >= m) {
-      new Notification('こころの記録 🌱', { body: '今日の記録がまだです。1分で完了します！' });
+    const now    = new Date();
+    const target = new Date();
+    target.setHours(h, m, 0, 0);
+
+    const fire = async () => {
+      const today = await getTodayEntry();
+      if (!today) new Notification('こころの記録 🌱', { body: '今日の記録がまだです。1分で完了します！' });
+    };
+
+    const msUntil = target - now;
+    if (msUntil > 0) {
+      const timer = setTimeout(fire, msUntil);
+      return () => clearTimeout(timer);
     }
+    fire();
   }, []);
 
   const state         = analyzeState(entries);
@@ -149,13 +161,13 @@ export default function Home({ onNavigate, providerToken = null }) {
         <p className="state-advice">💡 {state.advice}</p>
         <div className="ai-advice-section">
           <div className="divider" />
-          <span className="ai-advice-label">✨ AIパーソナルアドバイス</span>
+          <span className="ai-advice-label">💬 AIに相談する</span>
           <input
             className="today-note-input"
             type="text"
             value={todayNote}
             onChange={e => setTodayNote(e.target.value)}
-            placeholder="今日の状況をひとこと…（例：試験がある、休日）"
+            placeholder="気になっていることや悩みをひとこと…（任意）"
             maxLength={60}
           />
           <div className="ai-advice-header">
@@ -165,7 +177,7 @@ export default function Home({ onNavigate, providerToken = null }) {
               onClick={handleAIAdvice}
               disabled={aiLoading}
             >
-              {aiLoading ? '生成中…' : aiAdvice ? '再生成' : '聞いてみる'}
+              {aiLoading ? '考え中…' : aiAdvice ? 'もう一度' : '相談する'}
             </button>
           </div>
           {aiLoading && (
@@ -245,9 +257,10 @@ export default function Home({ onNavigate, providerToken = null }) {
         )}
       </Collapsible>
 
-      {/* ⑤ 今週のふりかえり（折りたたみ） */}
+      {/* ⑤ 今週のふりかえり */}
       {weeklySummary && (
-        <Collapsible title="📊 今週のふりかえり">
+        <div className="card">
+          <h2 className="card-section-title">📊 今週のふりかえり</h2>
           <ul className="summary-list">
             {weeklySummary.map((m, i) => (
               <li key={i} className="summary-item">
@@ -256,10 +269,16 @@ export default function Home({ onNavigate, providerToken = null }) {
               </li>
             ))}
           </ul>
-        </Collapsible>
+        </div>
       )}
 
-      {/* ⑤ 深呼吸エクササイズ（折りたたみ） */}
+      {/* ⑥ 今日のひとこと */}
+      <div className="card">
+        <h2 className="card-section-title">✨ 今日のひとこと</h2>
+        <p className="tip-body">「{tip}」</p>
+      </div>
+
+      {/* ⑦ 深呼吸エクササイズ（折りたたみ） */}
       <Collapsible title="🫁 深呼吸エクササイズ（4-7-8）">
         <p className="card-desc" style={{ marginBottom: 12 }}>
           ストレスを感じたら試してみましょう。吸う4秒→止める7秒→吐く8秒を3回繰り返します。
@@ -279,11 +298,6 @@ export default function Home({ onNavigate, providerToken = null }) {
             <p className="breath-progress">{breathRound + 1} / 3 回目</p>
           </div>
         )}
-      </Collapsible>
-
-      {/* ⑥ 今日のひとこと（折りたたみ） */}
-      <Collapsible title="✨ 今日のひとこと">
-        <p className="tip-body">「{tip}」</p>
       </Collapsible>
 
     </div>

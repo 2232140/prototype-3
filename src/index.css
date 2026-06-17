@@ -1382,3 +1382,37 @@ button {
 
 .slider-memo-block { padding: 20px 0 8px; }
 .step-hint-inline  { font-size: 12px; font-weight: 400; color: var(--sub); }
+
+/* ===== SLIDER TICKS + SNAP BUTTONS ===== */
+.slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+  margin-top: 6px;
+}
+.slider-tick {
+  width: 1.5px;
+  height: 6px;
+  background: #D1D5DB;
+  border-radius: 1px;
+  display: block;
+}
+
+.slider-snap-btns {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  gap: 6px;
+}
+.snap-btn {
+  flex: 1;
+  padding: 8px 0;
+  font-size: 22px;
+  border-radius: var(--r-sm);
+  border: 2px solid var(--border);
+  background: var(--card-bg);
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.15s, background 0.15s;
+}
+.snap-btn:active  { transform: scale(0.9); }
+.snap-btn.active  { transform: scale(1.08); }

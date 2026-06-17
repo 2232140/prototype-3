@@ -29,9 +29,20 @@ function SliderQuestion({ label, value, onChange, options, color }) {
         className="mood-range"
         style={{ '--fill': fill, '--color': color }}
       />
-      <div className="slider-endpoints">
-        <span>{options[0].emoji} {options[0].label}</span>
-        <span>{options[4].label} {options[4].emoji}</span>
+      <div className="slider-ticks">
+        {[1,2,3,4,5].map(v => <span key={v} className="slider-tick" />)}
+      </div>
+      <div className="slider-snap-btns">
+        {options.map(o => (
+          <button
+            key={o.value}
+            className={`snap-btn ${Math.round(value) === o.value ? 'active' : ''}`}
+            style={Math.round(value) === o.value ? { borderColor: color, background: color + '22' } : {}}
+            onClick={() => onChange(o.value)}
+          >
+            {o.emoji}
+          </button>
+        ))}
       </div>
     </div>
   );
